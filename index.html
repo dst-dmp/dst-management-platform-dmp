@@ -22,13 +22,12 @@
             --accent: #8C57FF;
             --accent-glow: rgba(140,87,255,.18);
             --accent-soft: rgba(140,87,255,.08);
-            --glass-highlight: rgba(255,255,255,.14);
-            --glass-base: rgba(255,255,255,.03);
-            --glass-tint: rgba(140,87,255,.07);
-            --glass-edge: rgba(255,255,255,.1);
-            --glass-highlight-scrolled: rgba(255,255,255,.07);
-            --glass-base-scrolled: rgba(255,255,255,.04);
-            --glass-edge-scrolled: rgba(255,255,255,.04);
+            --nav-glass-bg: rgba(255,255,255,.16);
+            --nav-glass-border: rgba(255,255,255,.1);
+            --nav-glass-shadow: 0 8px 32px rgba(0,0,0,.3);
+            --nav-blur: 16px;
+            --theme-border: rgba(255,255,255,.14);
+            --theme-icon: hsla(0,0%,100%,.62);
             --nav-link-hover: rgba(255,255,255,.06);
             --btn-secondary-bg: rgba(255,255,255,.05);
             --btn-secondary-hover: rgba(255,255,255,.08);
@@ -37,7 +36,7 @@
             --radius-sm: 12px;
             --radius: 20px;
             --radius-lg: 28px;
-            --nav-height: 56px;
+            --nav-height: 52px;
         }
         [data-theme="light"] {
             --bg: #f5f5f7;
@@ -50,13 +49,11 @@
             --text-tertiary: #a1a1a6;
             --accent-glow: rgba(140,87,255,.12);
             --accent-soft: rgba(140,87,255,.06);
-            --glass-highlight: rgba(255,255,255,.65);
-            --glass-base: rgba(255,255,255,.25);
-            --glass-tint: rgba(140,87,255,.05);
-            --glass-edge: rgba(255,255,255,.35);
-            --glass-highlight-scrolled: rgba(255,255,255,.75);
-            --glass-base-scrolled: rgba(255,255,255,.45);
-            --glass-edge-scrolled: rgba(255,255,255,.55);
+            --nav-glass-bg: rgba(255,255,255,.72);
+            --nav-glass-border: rgba(0,0,0,.08);
+            --nav-glass-shadow: 0 8px 32px rgba(0,0,0,.1);
+            --theme-border: rgba(0,0,0,.14);
+            --theme-icon: rgba(32,33,36,.68);
             --nav-link-hover: rgba(0,0,0,.04);
             --btn-secondary-bg: rgba(0,0,0,.04);
             --btn-secondary-hover: rgba(0,0,0,.07);
@@ -84,54 +81,106 @@
         }
 
         /* ─── Navigation ─── */
+        /* Floating pill: transparent and full-width at the top of the page.
+           Once scrolled it contracts (1140 → 980) while its glass layer fades
+           in and the navigation fades into place — same choreography as the
+           DeepSeek Harness header, which springs max-width 1280 → 980. */
         .nav {
-            position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
-            z-index: 100; width: calc(100% - 48px); max-width: 720px;
-            height: var(--nav-height);
-            background: linear-gradient(
-                165deg,
-                var(--glass-highlight) 0%,
-                var(--glass-base) 30%,
-                var(--glass-tint) 60%,
-                var(--glass-base) 100%
-            );
-            backdrop-filter: blur(60px) saturate(160%);
-            -webkit-backdrop-filter: blur(60px) saturate(160%);
-            border: 1px solid var(--border);
-            border-radius: 100px;
+            position: fixed; top: 0; left: 0; right: 0;
+            margin: 0 auto; z-index: 100;
+            width: min(100% - 48px, 1140px);
+            padding: 10px 0 0;
+        }
+        .nav-bar {
+            position: relative; margin: 0 auto;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 8px 0 24px;
-            box-shadow:
-                inset 0 1px 0 var(--glass-edge),
-                0 4px 24px rgba(0,0,0,.12);
-            transition: all .4s cubic-bezier(.25,.1,.25,1);
+            height: var(--nav-height);
+            max-width: 1140px; padding: 0;
+            border: 1px solid transparent; border-radius: 100px;
+            transition: max-width .42s cubic-bezier(.22,1,.36,1),
+                        padding .42s cubic-bezier(.22,1,.36,1);
         }
-        .nav.scrolled {
-            --glass-highlight: var(--glass-highlight-scrolled);
-            --glass-base: var(--glass-base-scrolled);
-            --glass-edge: var(--glass-edge-scrolled);
-            border-color: var(--border-hover);
-            box-shadow:
-                inset 0 1px 0 var(--glass-edge-scrolled),
-                0 8px 32px rgba(0,0,0,.2);
+        .nav-bar.is-scrolled { max-width: 980px; padding: 0 6px 0 16px; }
+        .nav-bar::before {
+            content: "";
+            position: absolute; inset: -1px; border-radius: inherit;
+            background: var(--nav-glass-bg);
+            backdrop-filter: blur(var(--nav-blur)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--nav-blur)) saturate(180%);
+            border: 1px solid var(--nav-glass-border);
+            box-shadow: var(--nav-glass-shadow);
+            opacity: 0; visibility: hidden;
+            transition: opacity .4s ease-in-out, visibility 0s .4s;
+            pointer-events: none; z-index: -1;
         }
-        .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-        .nav-brand img { height: 28px; width: auto; }
-        .nav-brand span { color: var(--text); font-weight: 600; font-size: 15px; letter-spacing: -.2px; }
-        .nav-links { display: flex; align-items: center; gap: 4px; list-style: none; }
+        .nav-bar.is-scrolled::before {
+            opacity: 1; visibility: visible;
+            transition: opacity .4s ease-in-out, visibility 0s;
+        }
+        .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; min-width: 0; }
+        .nav-brand img { height: 26px; width: auto; }
+        .nav-brand span { color: var(--text); font-weight: 600; font-size: 15px; letter-spacing: -.2px; white-space: nowrap; }
+        .nav-actions { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+        /* Navigation stays out of the way until the pill itself appears. */
+        .nav-links, .nav-cta {
+            opacity: 0; visibility: hidden;
+            transform: translateX(-10px); filter: blur(4px);
+            transition: opacity .26s cubic-bezier(.4,0,.2,1),
+                        transform .26s cubic-bezier(.4,0,.2,1),
+                        filter .26s cubic-bezier(.4,0,.2,1),
+                        visibility 0s linear .26s;
+        }
+        .nav-bar.is-scrolled .nav-links,
+        .nav-bar.is-scrolled .nav-cta {
+            opacity: 1; visibility: visible;
+            transform: none; filter: blur(0);
+            transition: opacity .34s cubic-bezier(.4,0,.2,1),
+                        transform .34s cubic-bezier(.4,0,.2,1),
+                        filter .34s cubic-bezier(.4,0,.2,1),
+                        visibility 0s;
+        }
+        .nav-bar.is-scrolled .nav-links { transition-delay: .05s, .05s, .05s, 0s; }
+        .nav-bar.is-scrolled .nav-cta { transition-delay: .1s, .1s, .1s, 0s; }
+
+        .nav-links { display: flex; align-items: center; gap: 2px; list-style: none; }
         .nav-links a {
             color: var(--text-secondary); text-decoration: none;
-            font-size: 13px; font-weight: 500; padding: 8px 16px;
-            border-radius: 100px; transition: all .25s ease; letter-spacing: -.1px;
+            font-size: 13px; font-weight: 500; padding: 8px 14px;
+            border-radius: 100px; transition: color .25s ease, background-color .25s ease;
+            letter-spacing: -.1px; white-space: nowrap;
         }
         .nav-links a:hover { color: var(--text); background: var(--nav-link-hover); }
         .nav-cta {
-            background: var(--accent); color: #fff !important;
-            font-weight: 600 !important; padding: 8px 20px !important;
-            margin-left: 4px;
-            margin-right: 8px;
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 8px 18px; border-radius: 100px;
+            background: var(--accent); color: #fff;
+            font-size: 13px; font-weight: 600; letter-spacing: -.1px;
+            text-decoration: none; white-space: nowrap;
+            box-shadow: 0 2px 14px var(--accent-glow);
         }
-        .nav-cta:hover { background: #9D6FFF !important; transform: scale(1.03); }
+        .nav-cta:hover { background: #9D6FFF; box-shadow: 0 4px 20px var(--accent-glow); }
+
+        /* ─── Theme Toggle ─── */
+        /* One icon only — it shows the theme you are currently in
+           (sun in light, moon in dark) and toggles on click. */
+        .theme-toggle {
+            display: grid; place-items: center; flex-shrink: 0;
+            width: 32px; height: 32px; padding: 0;
+            border: 1px solid var(--theme-border); border-radius: 50%;
+            background: transparent; cursor: pointer;
+            color: var(--theme-icon);
+            transition: color .2s, background-color .2s, border-color .2s;
+        }
+        .theme-toggle:hover { color: var(--text); background: var(--nav-link-hover); }
+        .theme-toggle svg {
+            grid-area: 1 / 1; width: 16px; height: 16px;
+            transition: opacity .25s ease, transform .45s cubic-bezier(.25,.1,.25,1);
+        }
+        .theme-toggle .icon-sun  { opacity: 0; transform: rotate(-90deg) scale(.6); }
+        .theme-toggle .icon-moon { opacity: 1; transform: rotate(0deg) scale(1); }
+        [data-theme="light"] .theme-toggle .icon-sun  { opacity: 1; transform: rotate(0deg) scale(1); }
+        [data-theme="light"] .theme-toggle .icon-moon { opacity: 0; transform: rotate(90deg) scale(.6); }
 
         /* ─── Section Base ─── */
         section { position: relative; z-index: 1; padding: 120px 24px; }
@@ -359,31 +408,6 @@
         .reveal { opacity: 0; transform: translateY(40px); transition: all .8s cubic-bezier(.25,.1,.25,1); }
         .reveal.visible { opacity: 1; transform: translateY(0); }
 
-        /* ─── Theme Toggle ─── */
-        .theme-toggle {
-            position: fixed; top: 24px; right: 24px;
-            z-index: 110; width: 40px; height: 40px;
-            border-radius: 50%; border: 1px solid var(--border);
-            background: var(--glass-highlight);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: all .4s cubic-bezier(.25,.1,.25,1);
-            color: var(--text-secondary);
-        }
-        .theme-toggle:hover {
-            border-color: var(--border-hover); color: var(--text);
-            transform: scale(1.08);
-        }
-        .theme-toggle svg { width: 18px; height: 18px; transition: transform .5s cubic-bezier(.25,.1,.25,1); }
-        .theme-toggle .icon-sun, .theme-toggle .icon-moon {
-            position: absolute; transition: all .5s cubic-bezier(.25,.1,.25,1);
-        }
-        [data-theme="light"] .theme-toggle .icon-moon { opacity: 0; transform: rotate(90deg) scale(.5); }
-        [data-theme="light"] .theme-toggle .icon-sun { opacity: 1; transform: rotate(0) scale(1); }
-        .theme-toggle .icon-sun { opacity: 0; transform: rotate(-90deg) scale(.5); }
-        .theme-toggle .icon-moon { opacity: 1; transform: rotate(0) scale(1); }
-
         /* ─── Support Banner ─── */
         .support-banner {
             position: fixed;
@@ -449,12 +473,17 @@
         /* Shift fixed elements when banner is visible — positions set dynamically via JS */
 
         /* ─── Responsive ─── */
+        @media (max-width: 1024px) {
+            .nav { width: min(100% - 40px, 1140px); }
+        }
+
         @media (max-width: 768px) {
-            .nav { width: calc(100% - 32px); padding: 0 6px 0 20px; border-radius: 80px; }
-            .nav-links a { padding: 8px 12px; font-size: 13px; }
+            .nav { width: calc(100% - 20px); padding-top: 8px; }
+            .nav-bar.is-scrolled { max-width: calc(100% - 20px); padding: 0 6px 0 14px; }
+            .nav-links a { padding: 8px 10px; font-size: 13px; }
             .nav-brand span { font-size: 14px; }
-            .nav-cta { padding: 8px 16px !important; font-size: 13px !important; }
-            .theme-toggle { top: 24px; }
+            .nav-cta { padding: 8px 14px; }
+            .nav-actions { gap: 8px; }
             section { padding: 80px 20px; }
             .hero h1 { font-size: 36px; }
             .features-grid { grid-template-columns: 1fr; }
@@ -463,11 +492,13 @@
             footer .footer-inner { flex-direction: column; text-align: center; }
         }
 
+        @media (max-width: 600px) {
+            .nav-links { display: none; }
+        }
+
         @media (max-width: 480px) {
-            .nav { left: 16px; right: 60px; transform: none; width: auto; }
-            .nav-brand span { font-size: 15px; }
-            .theme-toggle { top: 26px; right: 14px; width: 36px; height: 36px; }
-            .nav-links a:not(.nav-cta) { display: none; }
+            .theme-toggle { width: 30px; height: 30px; }
+            .theme-toggle svg { width: 15px; height: 15px; }
             .hero-actions { flex-direction: column; width: 100%; margin-top: 28px; }
             .hero-actions .btn { justify-content: center; width: 100%; }
             .hero-platforms { flex-direction: column; align-items: stretch; gap: 8px; width: 100%; }
@@ -476,6 +507,11 @@
             .platform-pill > span { flex: 1; display: flex; align-items: center; justify-content: space-between; }
             .section-title { font-size: 28px; }
             .support-banner { font-size: 13px; padding: 10px 44px 10px 12px; }
+        }
+
+        @media (max-width: 380px) {
+            .nav-brand span { display: none; }
+            .nav-cta { padding: 8px 12px; }
         }
     </style>
 </head>
@@ -488,31 +524,34 @@
     <button class="banner-close" id="bannerClose" aria-label="关闭">&times;</button>
 </div>
 
-<button class="theme-toggle" id="themeToggle" aria-label="切换明暗主题">
-    <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-    </svg>
-    <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
-    </svg>
-</button>
-
 <canvas id="particles-canvas"></canvas>
 
 <!-- Navigation -->
 <nav class="nav" id="navbar">
-    <a href="#" class="nav-brand">
-        <img src="img/logo.png" alt="DMP">
-        <span>饥荒管理平台</span>
-    </a>
-    <ul class="nav-links">
-        <li><a href="#features">功能</a></li>
-        <li><a href="#projects">开源</a></li>
-<!--        <li><a href="#service">搭建</a></li>-->
-        <li><a href="#preview">预览</a></li>
-        <li><a href="#docs">文档</a></li>
-        <li><a href="https://docs.miraclesses.top/quick-start/" class="nav-cta" target="_blank" rel="noopener">快速上手</a></li>
-    </ul>
+    <div class="nav-bar" id="navBar">
+        <a href="#" class="nav-brand">
+            <img src="img/logo.png" alt="DMP">
+            <span>饥荒管理平台</span>
+        </a>
+        <div class="nav-actions">
+            <ul class="nav-links">
+                <li><a href="#features">功能</a></li>
+                <li><a href="#projects">开源</a></li>
+<!--                <li><a href="#service">搭建</a></li>-->
+                <li><a href="#preview">预览</a></li>
+                <li><a href="#docs">文档</a></li>
+            </ul>
+            <a href="https://docs.miraclesses.top/quick-start/" class="nav-cta" target="_blank" rel="noopener">快速上手</a>
+            <button type="button" class="theme-toggle" id="themeToggle" aria-label="切换到浅色主题" title="切换到浅色主题">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
 </nav>
 
 <!-- Hero -->
@@ -722,41 +761,37 @@
     let particleRgb = getComputedStyle(html).getPropertyValue('--particle-rgb').trim();
 
     function setTheme(theme) {
-        if (theme === 'light') {
+        const isLight = theme === 'light';
+        if (isLight) {
             html.setAttribute('data-theme', 'light');
         } else {
             html.removeAttribute('data-theme');
         }
         particleRgb = getComputedStyle(html).getPropertyValue('--particle-rgb').trim();
         localStorage.setItem('theme', theme);
+        // the button shows the current theme, so its label names the other one
+        const next = isLight ? '深色' : '浅色';
+        themeToggle.setAttribute('aria-label', '切换到' + next + '主题');
+        themeToggle.setAttribute('title', '切换到' + next + '主题');
     }
 
-    function toggleTheme() {
-        var current = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-        setTheme(current);
-    }
+    themeToggle.addEventListener('click', function() {
+        setTheme(html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    });
 
     // Load saved theme, default to dark
     var saved = localStorage.getItem('theme');
-    if (saved === 'light') {
-      setTheme('light');
-    } else {
-      setTheme('dark');
-    }
-
-    themeToggle.addEventListener('click', toggleTheme);
+    setTheme(saved === 'light' ? 'light' : 'dark');
 
     // ─── Support Banner Dismiss ───
     (function() {
         var banner = document.getElementById('supportBanner');
         var closeBtn = document.getElementById('bannerClose');
         var nav = document.getElementById('navbar');
-        var themeToggleBtn = document.getElementById('themeToggle');
 
         function adjustNavPosition() {
             var bannerH = banner.classList.contains('dismissed') ? 0 : banner.offsetHeight;
-            nav.style.top = (bannerH + 16) + 'px';
-            themeToggleBtn.style.top = (bannerH + 24) + 'px';
+            nav.style.top = bannerH + 'px';
         }
 
         document.body.classList.add('banner-visible');
@@ -766,8 +801,7 @@
         closeBtn.addEventListener('click', function() {
             banner.classList.add('dismissed');
             document.body.classList.remove('banner-visible');
-            nav.style.top = '';
-            themeToggleBtn.style.top = '';
+            adjustNavPosition();
         });
     })();
 
@@ -851,17 +885,21 @@
     animate();
 
     // ─── Navbar Scroll Effect ───
-    const navbar = document.getElementById('navbar');
+    const navbar = document.getElementById('navBar');
     let scrollTicking = false;
+    function syncNavState() {
+        navbar.classList.toggle('is-scrolled', window.scrollY > 80);
+    }
     window.addEventListener('scroll', function() {
         if (!scrollTicking) {
             requestAnimationFrame(function() {
-                navbar.classList.toggle('scrolled', window.scrollY > 40);
+                syncNavState();
                 scrollTicking = false;
             });
             scrollTicking = true;
         }
     }, { passive: true });
+    syncNavState();
 
     // ─── Scroll Reveal ───
     const revealEls = document.querySelectorAll('.reveal');
