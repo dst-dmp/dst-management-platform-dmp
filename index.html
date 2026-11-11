@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Miracle">
-    <meta name="description" content="饥荒管理平台(DMP) — 满足一键开服、玩家管理、房间管理、数据统计、定时任务等功能">
-    <meta name="keywords" content="饥荒, 饥荒联机版, Steam, 饥荒管理平台, DMP, 饥荒开服, Don't Starve Together">
+    <meta name="description" content="饥荒管理平台(DMP) — 满足一键开服、玩家管理、房间管理、数据统计、定时任务等功能；支持云账号与跨设备数据同步">
+    <meta name="keywords" content="饥荒, 饥荒联机版, Steam, 饥荒管理平台, DMP, 饥荒开服, 云账号, 云存档, 数据同步, Don't Starve Together">
     <title>饥荒管理平台 — DMP</title>
     <link href="img/favicon.ico" rel="icon">
     <style>
@@ -357,6 +357,20 @@
         }
         .project-card:hover .link-row { color: var(--accent); }
 
+        /* ─── Cloud Account ─── */
+        .cloud { scroll-margin-top: 96px; }
+        .cloud .section-header { text-align: center; margin-bottom: 40px; }
+        .cloud .section-header .section-desc { margin: 0 auto; }
+        .cloud-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .cloud-grid .project-card h3 { font-size: 20px; }
+        .cloud-cta {
+            display: flex; justify-content: center; align-items: center;
+            flex-wrap: wrap; gap: 14px; margin-bottom: 48px;
+        }
+
         /* ─── Docs CTA ─── */
         .docs-cta { text-align: center; }
         .docs-card {
@@ -501,6 +515,7 @@
             .theme-toggle svg { width: 15px; height: 15px; }
             .hero-actions { flex-direction: column; width: 100%; margin-top: 28px; }
             .hero-actions .btn { justify-content: center; width: 100%; }
+            .cloud-cta .btn { flex: 1 1 100%; justify-content: center; }
             .hero-platforms { flex-direction: column; align-items: stretch; gap: 8px; width: 100%; }
             .platform-pill { width: 100%; font-size: 12px; padding: 6px 14px 6px 11px; }
             .platform-pill svg { width: 15px; height: 15px; }
@@ -537,6 +552,7 @@
             <ul class="nav-links">
                 <li><a href="#features">功能</a></li>
                 <li><a href="#projects">开源</a></li>
+                <li><a href="#cloud">云账号</a></li>
 <!--                <li><a href="#service">搭建</a></li>-->
                 <li><a href="#preview">预览</a></li>
                 <li><a href="#docs">文档</a></li>
@@ -577,8 +593,11 @@
             </span>
         </div>
         <div class="hero-actions">
-            <a href="https://docs.miraclesses.top/quick-start/install.html" class="btn btn-primary" target="_blank" rel="noopener">
+            <a href="https://docs.miraclesses.top/" class="btn btn-primary" target="_blank" rel="noopener">
                 开始部署
+            </a>
+            <a href="https://dmp-cloud.miraclesses.top/" class="btn btn-secondary" target="_blank" rel="noopener">
+                云账号
             </a>
             <a href="https://github.com/miracleEverywhere/dst-management-platform-api" class="btn btn-secondary" target="_blank" rel="noopener">
                 GitHub
@@ -673,6 +692,42 @@
     </div>
 </section>
 
+<!-- Cloud Account -->
+<section class="cloud" id="cloud">
+    <div class="container">
+        <div class="section-header reveal">
+            <div class="section-label">云账号</div>
+            <h2 class="section-title">数据跟着账号走，<br>换台机器继续开服。</h2>
+            <p class="section-desc">注册 DMP 云账号并与本地账号关联，房间、世界与房间设置会以完整快照保存到云端。换设备、重装系统、误删存档，登录后即可恢复。</p>
+        </div>
+        <div class="cloud-cta reveal">
+            <a href="https://dmp-cloud.miraclesses.top/register" class="btn btn-primary" target="_blank" rel="noopener">
+                免费注册云账号 <span class="arrow">→</span>
+            </a>
+            <a href="https://dmp-cloud.miraclesses.top/login" class="btn btn-secondary" target="_blank" rel="noopener">
+                已有账号，去登录
+            </a>
+        </div>
+        <div class="cloud-grid">
+            <div class="project-card reveal" style="transition-delay: .1s">
+                <span class="lang">跨设备同步</span>
+                <h3>换台机器接着玩</h3>
+                <p>关联云账号后，房间、世界与房间设置快照会同步到云端。换电脑或重装系统，登录 DMP 就能拉回原来的收藏。</p>
+            </div>
+            <div class="project-card reveal" style="transition-delay: .2s">
+                <span class="lang">永久保存</span>
+                <h3>云端留一份底</h3>
+                <p>收藏以完整快照保存在云端，不占本地磁盘。误删存档、迁移机器，都能随时下载恢复。</p>
+            </div>
+            <div class="project-card reveal" style="transition-delay: .3s">
+                <span class="lang">多设备</span>
+                <h3>一个账号，多台设备</h3>
+                <p>同一云账号可关联多台 DMP，共用一份云端收藏；上传、下载或双向同步都由你决定。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Service -->
 <!--<section class="docs-cta" id="service">-->
 <!--    <div class="container">-->
@@ -743,6 +798,7 @@
             </a>
         </div>
         <ul class="footer-links">
+            <li><a href="https://dmp-cloud.miraclesses.top" target="_blank" rel="noopener">云账号</a></li>
             <li><a href="https://github.com/miracleEverywhere/dst-management-platform-web" target="_blank" rel="noopener">前端</a></li>
             <li><a href="https://github.com/miracleEverywhere/dst-management-platform-api" target="_blank" rel="noopener">后端</a></li>
             <li><a href="https://github.com/miracleEverywhere/dst-management-platform-desktop" target="_blank" rel="noopener">桌面应用</a></li>
