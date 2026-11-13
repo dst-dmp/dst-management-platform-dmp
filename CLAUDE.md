@@ -32,10 +32,10 @@ npx serve .
 
 ## Key implementation details
 
-- **Theme (light/dark):** Toggled via `data-theme` attribute on `<html>`. All colors are defined as CSS custom properties on `:root` and `[data-theme="light"]`. Theme preference is persisted in `localStorage`.
+- **Theme (light/dark/system):** The navbar toggle cycles on click: light → dark → follow-system (default). The chosen mode is stored in `data-theme-mode` and drives the sun / moon / monitor icon plus a small status pill; the resolved theme is applied via `data-theme` on `<html>`. All colors are defined as CSS custom properties on `:root` and `[data-theme="light"]`. Preference is persisted in `localStorage` under `theme-mode`, and `system` follows `prefers-color-scheme` live. A tiny inline script in `<head>` applies the saved mode before first paint.
 - **Canvas particles:** A floating ember particle system rendered on a `<canvas>` element with mouse repulsion effect. Particle color is driven by the `--particle-rgb` CSS variable.
 - **Navbar:** Fixed position with glassmorphism effect (`backdrop-filter`). Transitions to a scrolled state (different glass variables) after 40px scroll.
 - **Scroll reveal:** `IntersectionObserver`-based fade-in-up animations on section elements.
 - **Feature cards:** Mouse-position-tracked radial gradient glow effect.
 - **All styling is inline in `<style>` tags**, using CSS custom properties for theming. The design relies on CSS grid, flexbox, `backdrop-filter`, and CSS animations — no CSS-in-JS or CSS modules.
-- **All JS is inline in a single `<script>` block** at the end of the file. No modules, no transpilation.
+- **All JS is inline** — one tiny `<script>` in `<head>` for pre-paint theme initialization and the main `<script>` block at the end of the file for everything else. No modules, no transpilation.

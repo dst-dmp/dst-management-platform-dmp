@@ -8,6 +8,28 @@
     <meta name="keywords" content="饥荒, 饥荒联机版, Steam, 饥荒管理平台, DMP, 饥荒开服, 云账号, 云存档, 数据同步, Don't Starve Together">
     <title>饥荒管理平台 — DMP</title>
     <link href="img/favicon.ico" rel="icon">
+    <script>
+        /* Resolve the theme before first paint to avoid a flash of the wrong
+           theme. The chosen mode lives in data-theme-mode — 'light', 'dark' or
+           'system' (default) — while data-theme carries the resolved theme. */
+        (function() {
+            var MODES = ['light', 'dark', 'system'];
+            var mode = null;
+            try { mode = localStorage.getItem('theme-mode'); } catch (e) {}
+            if (MODES.indexOf(mode) === -1) mode = 'system';
+
+            var systemDark = window.matchMedia
+                ? window.matchMedia('(prefers-color-scheme: dark)')
+                : null;
+            var resolved = mode === 'system'
+                ? (systemDark && systemDark.matches ? 'dark' : 'light')
+                : mode;
+
+            var root = document.documentElement;
+            root.setAttribute('data-theme-mode', mode);
+            if (resolved === 'light') root.setAttribute('data-theme', 'light');
+        })();
+    </script>
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -37,6 +59,7 @@
             --radius: 20px;
             --radius-lg: 28px;
             --nav-height: 52px;
+            color-scheme: dark;
         }
         [data-theme="light"] {
             --bg: #f5f5f7;
@@ -162,25 +185,48 @@
         .nav-cta:hover { background: #9D6FFF; box-shadow: 0 4px 20px var(--accent-glow); }
 
         /* ─── Theme Toggle ─── */
-        /* One icon only — it shows the theme you are currently in
-           (sun in light, moon in dark) and toggles on click. */
+        /* Clicking cycles light → dark → follow-system. One icon shows the
+           active mode: sun for light, moon for dark, monitor for system.
+           A small pill labels the mode on hover/focus and after each click. */
+        .theme-control { position: relative; display: flex; flex-shrink: 0; }
         .theme-toggle {
             display: grid; place-items: center; flex-shrink: 0;
             width: 32px; height: 32px; padding: 0;
             border: 1px solid var(--theme-border); border-radius: 50%;
             background: transparent; cursor: pointer;
             color: var(--theme-icon);
-            transition: color .2s, background-color .2s, border-color .2s;
+            transition: color .2s, background-color .2s, border-color .2s,
+                        transform .18s cubic-bezier(.34,1.56,.64,1);
         }
-        .theme-toggle:hover { color: var(--text); background: var(--nav-link-hover); }
+        .theme-toggle:hover { color: var(--text); background: var(--nav-link-hover); transform: scale(1.08); }
+        .theme-toggle:active { transform: scale(.92); }
         .theme-toggle svg {
             grid-area: 1 / 1; width: 16px; height: 16px;
+            opacity: 0; transform: rotate(-90deg) scale(.6);
             transition: opacity .25s ease, transform .45s cubic-bezier(.25,.1,.25,1);
         }
-        .theme-toggle .icon-sun  { opacity: 0; transform: rotate(-90deg) scale(.6); }
-        .theme-toggle .icon-moon { opacity: 1; transform: rotate(0deg) scale(1); }
-        [data-theme="light"] .theme-toggle .icon-sun  { opacity: 1; transform: rotate(0deg) scale(1); }
-        [data-theme="light"] .theme-toggle .icon-moon { opacity: 0; transform: rotate(90deg) scale(.6); }
+        /* Show the icon that matches the active mode */
+        [data-theme-mode="light"] .theme-toggle .icon-sun,
+        [data-theme-mode="dark"] .theme-toggle .icon-moon,
+        [data-theme-mode="system"] .theme-toggle .icon-auto { opacity: 1; transform: rotate(0deg) scale(1); }
+        /* Fallback when the mode attribute is missing (JS disabled) */
+        html:not([data-theme-mode]) .theme-toggle .icon-moon { opacity: 1; transform: rotate(0deg) scale(1); }
+
+        .theme-hint {
+            position: absolute; top: calc(100% + 8px); right: 0; z-index: 10;
+            padding: 5px 10px; border-radius: 999px;
+            background: var(--bg-card); border: 1px solid var(--border-hover);
+            box-shadow: 0 6px 20px var(--card-shadow);
+            color: var(--text-secondary);
+            font-size: 12px; font-weight: 500; letter-spacing: -.1px;
+            line-height: 1.4; white-space: nowrap;
+            pointer-events: none;
+            opacity: 0; transform: translateY(-4px);
+            transition: opacity .18s ease, transform .18s ease;
+        }
+        .theme-control:hover .theme-hint,
+        .theme-control:focus-within .theme-hint,
+        .theme-hint.is-visible { opacity: 1; transform: none; }
 
         /* ─── Section Base ─── */
         section { position: relative; z-index: 1; padding: 120px 24px; }
@@ -558,14 +604,21 @@
                 <li><a href="#docs">文档</a></li>
             </ul>
             <a href="https://docs.miraclesses.top/quick-start/" class="nav-cta" target="_blank" rel="noopener">快速上手</a>
-            <button type="button" class="theme-toggle" id="themeToggle" aria-label="切换到浅色主题" title="切换到浅色主题">
-                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
-                </svg>
-            </button>
+            <div class="theme-control">
+                <button type="button" class="theme-toggle" id="themeToggle"
+                        aria-label="明暗主题：跟随系统（点击切换）" title="明暗主题：跟随系统（点击切换）">
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                    </svg>
+                    <svg class="icon-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                </button>
+                <span class="theme-hint" id="themeHint" role="status" aria-live="polite">跟随系统</span>
+            </div>
         </div>
     </div>
 </nav>
@@ -778,7 +831,7 @@
             <div class="section-label">深度文档</div>
             <h2 class="section-title">准备好搭建<br>你的服务器了吗？</h2>
             <p class="section-desc">从环境准备到配置调优，完整的文档体系助你快速上手。</p>
-            <a href="https://docs.miraclesses.top/docs/" class="btn btn-primary" target="_blank" rel="noopener">
+            <a href="https://docs.miraclesses.top/" class="btn btn-primary" target="_blank" rel="noopener">
                 查看文档
             </a>
         </div>
@@ -812,32 +865,77 @@
     'use strict';
 
     // ─── Theme Toggle ───
+    // Clicking cycles light → dark → follow-system; the default is follow-system.
     const html = document.documentElement;
     const themeToggle = document.getElementById('themeToggle');
+    const themeHint = document.getElementById('themeHint');
+    const systemPrefersDark = window.matchMedia
+        ? window.matchMedia('(prefers-color-scheme: dark)')
+        : null;
+    const THEME_MODES = ['light', 'dark', 'system'];
+    const THEME_LABELS = { light: '浅色', dark: '深色', system: '跟随系统' };
     let particleRgb = getComputedStyle(html).getPropertyValue('--particle-rgb').trim();
+    let hintTimer = null;
 
-    function setTheme(theme) {
-        const isLight = theme === 'light';
-        if (isLight) {
+    function currentMode() {
+        const mode = html.getAttribute('data-theme-mode');
+        return THEME_MODES.indexOf(mode) === -1 ? 'system' : mode;
+    }
+
+    function applyTheme(mode) {
+        if (THEME_MODES.indexOf(mode) === -1) mode = 'system';
+        const light = mode === 'light' ||
+            (mode === 'system' && !(systemPrefersDark && systemPrefersDark.matches));
+
+        html.setAttribute('data-theme-mode', mode);
+        if (light) {
             html.setAttribute('data-theme', 'light');
         } else {
             html.removeAttribute('data-theme');
         }
         particleRgb = getComputedStyle(html).getPropertyValue('--particle-rgb').trim();
-        localStorage.setItem('theme', theme);
-        // the button shows the current theme, so its label names the other one
-        const next = isLight ? '深色' : '浅色';
-        themeToggle.setAttribute('aria-label', '切换到' + next + '主题');
-        themeToggle.setAttribute('title', '切换到' + next + '主题');
+
+        const label = THEME_LABELS[mode];
+        const hint = '明暗主题：' + label + '（点击切换）';
+        themeToggle.setAttribute('aria-label', hint);
+        themeToggle.setAttribute('title', hint);
+        if (themeHint.textContent !== label) themeHint.textContent = label;
+
+        try { localStorage.setItem('theme-mode', mode); } catch (e) {}
+    }
+
+    function flashHint() {
+        themeHint.classList.add('is-visible');
+        clearTimeout(hintTimer);
+        hintTimer = setTimeout(function() {
+            themeHint.classList.remove('is-visible');
+        }, 1400);
     }
 
     themeToggle.addEventListener('click', function() {
-        setTheme(html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+        /* light → dark → system → light … */
+        applyTheme(THEME_MODES[(THEME_MODES.indexOf(currentMode()) + 1) % THEME_MODES.length]);
+        flashHint();
     });
 
-    // Load saved theme, default to dark
-    var saved = localStorage.getItem('theme');
-    setTheme(saved === 'light' ? 'light' : 'dark');
+    // Keep following the OS while in system mode.
+    function syncWithSystem() {
+        if (currentMode() === 'system') applyTheme('system');
+    }
+    if (systemPrefersDark) {
+        if (typeof systemPrefersDark.addEventListener === 'function') {
+            systemPrefersDark.addEventListener('change', syncWithSystem);
+        } else if (typeof systemPrefersDark.addListener === 'function') {
+            systemPrefersDark.addListener(syncWithSystem); // legacy Safari
+        }
+    }
+
+    // Drop the key written by the old light/dark-only toggle: it was saved on
+    // every visit, so it does not reflect a real choice and would pin visitors
+    // to dark instead of the new follow-system default.
+    try { localStorage.removeItem('theme'); } catch (e) {}
+
+    applyTheme(currentMode());
 
     // ─── Support Banner Dismiss ───
     (function() {
